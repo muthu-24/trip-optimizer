@@ -3,10 +3,12 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.activity import Activity
+from app.models.destination import Destination
 from app.services.trip_planner import (
     calculate_activity_score,
     generate_itinerary
 )
+from app.services.recommendation_service import calculate_trip_cost_breakdown
 
 
 router = APIRouter(
@@ -24,6 +26,8 @@ def get_personalized_activities(
     preferred_activities: list[str],
     db: Session = Depends(get_db)
 ):
+    destination = db.query(Destination).filter(Destination.id == destination_id).first()
+
     activities = (
         db.query(Activity)
         .filter(Activity.destination_id == destination_id)
@@ -31,6 +35,7 @@ def get_personalized_activities(
     )
 
     scored_activities = []
+    total_activity_cost = 0.0
 
     for activity in activities:
         score = calculate_activity_score(
@@ -60,8 +65,21 @@ def get_personalized_activities(
         trip_duration=trip_duration
     )
 
+    for day_plan in itinerary:
+        total_activity_cost += day_plan["total_cost"]
+
+    cost_breakdown = {}
+    if destination:
+        cost_breakdown = calculate_trip_cost_breakdown(
+            destination=destination,
+            trip_duration=trip_duration,
+            total_activity_costs=total_activity_cost
+        )
+
     return {
         "destination_id": destination_id,
+        "destination_name": destination.name if destination else "",
         "activities": scored_activities,
-        "itinerary": itinerary
+        "itinerary": itinerary,
+        "cost_breakdown": cost_breakdown,
     }
