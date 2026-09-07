@@ -35,10 +35,11 @@ function Register() {
       setTimeout(() => {
         navigate("/login");
       }, 1500);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Registration failed:", error);
+      const axiosError = error as { response?: { data?: { detail?: string } } };
       const detail =
-        error.response?.data?.detail || "Registration failed. Please check your information and try again.";
+        axiosError.response?.data?.detail || "Registration failed. Please check your information and try again.";
       setErrorMessage(detail);
     } finally {
       setIsLoading(false);

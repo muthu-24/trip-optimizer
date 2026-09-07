@@ -651,6 +651,66 @@
   padding: 4px 14px;
   border-radius: var(--radius-full);
   box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+  z-index: 2;
+}
+
+/* Category Gradient Strip on Recommendation Cards */
+.card-image-strip {
+  height: 84px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.card-strip-emoji {
+  font-size: 34px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+}
+
+.card-strip-rank {
+  font-size: 13px;
+  font-weight: 800;
+  color: #FFFFFF;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  letter-spacing: 0.04em;
+}
+
+/* Category Gradients */
+.card-img-beach {
+  background: linear-gradient(135deg, #0891B2 0%, #0E7490 50%, #155E75 100%);
+}
+
+.card-img-culture {
+  background: linear-gradient(135deg, #D97706 0%, #B45309 50%, #92400E 100%);
+}
+
+.card-img-nature {
+  background: linear-gradient(135deg, #16A34A 0%, #15803D 50%, #166534 100%);
+}
+
+.card-img-wildlife {
+  background: linear-gradient(135deg, #15803D 0%, #14532D 50%, #365314 100%);
+}
+
+.card-img-adventure {
+  background: linear-gradient(135deg, #4338CA 0%, #3730A3 50%, #312E81 100%);
+}
+
+.card-img-relaxation {
+  background: linear-gradient(135deg, #BE185D 0%, #9D174D 50%, #831843 100%);
+}
+
+.card-img-default {
+  background: linear-gradient(135deg, #0F766E 0%, #115E59 50%, #134E4A 100%);
 }
 
 /* Top Row */

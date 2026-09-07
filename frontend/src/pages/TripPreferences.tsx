@@ -27,6 +27,7 @@ type Recommendation = {
   country: string;
   region?: string;
   category?: string;
+  budget_level?: string;
   score: number;
   score_breakdown?: ScoreBreakdown;
   cost_breakdown?: CostBreakdown;
@@ -50,6 +51,17 @@ const ACTIVITY_METADATA: Record<string, { label: string; icon: string }> = {
   sightseeing: { label: "Sightseeing", icon: "🗺️" },
   relaxation: { label: "Relaxation", icon: "🌴" },
 };
+
+function getCategoryStyle(category: string): { gradientClass: string; emoji: string } {
+  const cat = (category || "").toLowerCase();
+  if (cat === "beach")     return { gradientClass: "card-img-beach",     emoji: "🏖️" };
+  if (cat === "culture")   return { gradientClass: "card-img-culture",   emoji: "🏛️" };
+  if (cat === "nature")    return { gradientClass: "card-img-nature",    emoji: "🌿" };
+  if (cat === "wildlife")  return { gradientClass: "card-img-wildlife",  emoji: "🦁" };
+  if (cat === "adventure") return { gradientClass: "card-img-adventure", emoji: "⛰️" };
+  if (cat === "relaxation") return { gradientClass: "card-img-relaxation", emoji: "🌴" };
+  return { gradientClass: "card-img-default", emoji: "📍" };
+}
 
 function TripPreferences() {
   const navigate = useNavigate();
@@ -96,8 +108,10 @@ function TripPreferences() {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
     setIsLoading(true);
     setErrorMessage(null);
     setHasSearched(true);
@@ -126,10 +140,11 @@ function TripPreferences() {
       }
 
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to get recommendations:", error);
+      const axiosError = error as { response?: { data?: { detail?: string } } };
       setErrorMessage(
-        error.response?.data?.detail ||
+        axiosError.response?.data?.detail ||
           "Could not connect to the recommendation service. Please verify the backend is running and try again."
       );
     } finally {
@@ -155,6 +170,42 @@ function TripPreferences() {
     setTimeout(() => {
       formRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 100);
+  };
+
+  // Fix: retry without requiring a FormEvent — calls the API directly
+  const handleRetry = async () => {
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/recommendations/",
+        {
+          budget: Number(budget),
+          trip_duration: Number(tripDuration),
+          travel_style: travelStyle,
+          preferred_activities: activities,
+          season: season,
+        }
+      );
+
+      const recs: Recommendation[] = response.data.recommendations || [];
+      recs.sort((a, b) => b.score - a.score);
+      setRecommendations(recs);
+      setShowResultsOnly(true);
+
+      if (recs.length > 0) {
+        setExpandedCard({ [recs[0].destination]: true });
+      }
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: { detail?: string } } };
+      setErrorMessage(
+        axiosError.response?.data?.detail ||
+          "Could not connect to the recommendation service. Please verify the backend is running and try again."
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSelectDestination = async (rec: Recommendation) => {
@@ -188,6 +239,21 @@ function TripPreferences() {
     } finally {
       setIsGeneratingPlan(null);
     }
+  };
+
+  const handleViewDetails = (rec: Recommendation) => {
+    navigate(`/destinations/${rec.id ?? 0}`, {
+      state: {
+        recommendation: rec,
+        preferences: {
+          budget,
+          tripDuration,
+          travelStyle,
+          season,
+          activities,
+        },
+      },
+    });
   };
 
   return (
@@ -406,7 +472,7 @@ function TripPreferences() {
               <button
                 type="button"
                 className="retry-btn"
-                onClick={handleSubmit}
+                onClick={handleRetry}
               >
                 🔄 Try Again
               </button>
@@ -512,7 +578,7 @@ function TripPreferences() {
                 const breakdown = recommendation.score_breakdown;
                 const costBreakdown = recommendation.cost_breakdown;
 
-                return (
+                  return (
                   <article
                     className={`recommendation-card ${isTopMatch ? "top-match-card" : ""}`}
                     key={recommendation.destination}
@@ -523,10 +589,20 @@ function TripPreferences() {
                       </div>
                     )}
 
+                    {/* Category Gradient Image Strip */}
+                    {(() => {
+                      const { gradientClass, emoji } = getCategoryStyle(recommendation.category ?? "");
+                      return (
+                        <div className={`card-image-strip ${gradientClass}`}>
+                          <span className="card-strip-emoji">{emoji}</span>
+                          <span className="card-strip-rank">#{index + 1}</span>
+                        </div>
+                      );
+                    })()}
+
                     {/* Card Main Info Area */}
                     <div className="card-header-row">
                       <div className="destination-identity">
-                        <span className="rank-badge">#{index + 1}</span>
                         <div>
                           <div className="dest-title-wrap">
                             <h3 className="destination-name">
@@ -535,6 +611,11 @@ function TripPreferences() {
                             {recommendation.category && (
                               <span className="category-tag">
                                 {recommendation.category}
+                              </span>
+                            )}
+                            {recommendation.budget_level && (
+                              <span className="budget-level-tag">
+                                💰 {recommendation.budget_level}
                               </span>
                             )}
                           </div>
@@ -745,9 +826,9 @@ function TripPreferences() {
                       <button
                         type="button"
                         className="details-secondary-btn"
-                        onClick={() => toggleCardDetails(recommendation.destination)}
+                        onClick={() => handleViewDetails(recommendation)}
                       >
-                        {isExpanded ? "Collapse Details" : "View Full Details"}
+                        👁️ View Details
                       </button>
 
                       <button
@@ -759,11 +840,11 @@ function TripPreferences() {
                         {isGeneratingPlan === recommendation.destination ? (
                           <>
                             <span className="btn-spinner"></span>
-                            <span>Building {recommendation.destination} Itinerary...</span>
+                            <span>Building Itinerary...</span>
                           </>
                         ) : (
                           <>
-                            <span>Select & Build Itinerary</span>
+                            <span>Plan My Trip</span>
                             <span className="btn-arrow">→</span>
                           </>
                         )}

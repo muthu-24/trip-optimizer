@@ -43,10 +43,11 @@ function Login() {
       }
 
       navigate("/dashboard");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Login failed:", error);
+      const axiosError = error as { response?: { data?: { detail?: string } } };
       const detail =
-        error.response?.data?.detail || "Invalid email or password. Please try again.";
+        axiosError.response?.data?.detail || "Invalid email or password. Please try again.";
       setErrorMessage(detail);
     } finally {
       setIsLoading(false);

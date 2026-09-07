@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import TripPreferences from "./pages/TripPreferences";
 import TripPlan from "./pages/TripPlan";
+import DestinationDetail from "./pages/DestinationDetail";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -34,10 +35,28 @@ function App() {
         />
 
         <Route
+          path="/trip-preferences"
+          element={
+            <ProtectedRoute>
+              <TripPreferences />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/trip-plan"
           element={
             <ProtectedRoute>
               <TripPlan />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/destinations/:id"
+          element={
+            <ProtectedRoute>
+              <DestinationDetail />
             </ProtectedRoute>
           }
         />

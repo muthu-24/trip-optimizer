@@ -1,4 +1,4 @@
-﻿import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import "./Navbar.css";
 
 export default function Navbar() {
@@ -10,8 +10,13 @@ export default function Navbar() {
     navigate("/login");
   };
 
-  const isPlanActive = location.pathname === "/plan-trip";
-  const isDashboardActive = location.pathname === "/dashboard";
+  const isDashboardActive =
+    location.pathname === "/dashboard" || location.pathname === "/";
+  const isPlanActive =
+    location.pathname === "/plan-trip" ||
+    location.pathname === "/trip-preferences" ||
+    location.pathname.startsWith("/destinations");
+  const isItineraryActive = location.pathname === "/trip-plan";
 
   return (
     <header className="navbar">
@@ -43,7 +48,7 @@ export default function Navbar() {
             to="/dashboard"
             className={`navbar-link ${isDashboardActive ? "active" : ""}`}
           >
-            Dashboard
+            Home
           </Link>
 
           <Link
@@ -51,6 +56,13 @@ export default function Navbar() {
             className={`navbar-link ${isPlanActive ? "active" : ""}`}
           >
             Plan Trip
+          </Link>
+
+          <Link
+            to="/trip-plan"
+            className={`navbar-link ${isItineraryActive ? "active" : ""}`}
+          >
+            Itinerary
           </Link>
 
           <button
