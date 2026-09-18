@@ -34,9 +34,12 @@ def run_database_migrations():
             text(
                 """
             ALTER TABLE activities ADD COLUMN IF NOT EXISTS description VARCHAR(300);
+            ALTER TABLE activities ADD COLUMN IF NOT EXISTS latitude FLOAT;
+            ALTER TABLE activities ADD COLUMN IF NOT EXISTS longitude FLOAT;
             """
             )
         )
+        conn.commit()
     print("[OK] Schema migrations checked successfully.")
 
 
@@ -297,7 +300,7 @@ DESTINATIONS_DATA = [
             {"name": "Koneswaram Ancient Hindu Cliff Temple", "category": "Culture", "cost": 0.0, "duration": 2.0, "rating": 4.8},
             {"name": "Fort Frederick Historic Ramparts & Deer Walk", "category": "Sightseeing", "cost": 0.0, "duration": 1.5, "rating": 4.5},
             {"name": "Kanniya Seven Hot Water Springs", "category": "Culture", "cost": 200.0, "duration": 1.0, "rating": 4.2},
-            {"name": "Marble Beach Pristine Bay Swim", "category": "Relaxation", "cost": 200.0, "duration": 3.0, "rating": 4.6},
+            {"name": "Marble Beach Pristine Bay Swim", "category": "Beach", "cost": 200.0, "duration": 3.0, "rating": 4.6},
         ],
     },
     {
@@ -521,7 +524,35 @@ def seed_database():
             # Clean and re-seed activities for this destination to prevent duplicates
             db.query(Activity).filter(Activity.destination_id == dest.id).delete()
 
-            for act_data in dest_data["activities_list"]:
+            # Base coordinates for destinations (approximate)
+            base_coords = {
+                "Ella": (6.866, 81.046),
+                "Nuwara Eliya": (6.949, 80.783),
+                "Kandy": (7.290, 80.633),
+                "Galle": (6.032, 80.217),
+                "Mirissa": (5.948, 80.453),
+                "Sigiriya": (7.957, 80.760),
+                "Dambulla": (7.873, 80.651),
+                "Yala": (6.368, 81.520),
+                "Udawalawe": (6.452, 80.889),
+                "Arugam Bay": (6.840, 81.826),
+                "Trincomalee": (8.587, 81.215),
+                "Anuradhapura": (8.311, 80.417),
+                "Hikkaduwa": (6.139, 80.106),
+                "Bentota": (6.420, 79.995),
+                "Haputale": (6.768, 80.959),
+                "Jaffna": (9.661, 80.025),
+                "Negombo": (7.200, 79.873),
+                "Knuckles": (7.369, 80.822)
+            }
+            
+            lat_base, lon_base = base_coords.get(dest_data["name"], (None, None))
+            offset_multiplier = 0.01 # ~1km
+
+            for idx, act_data in enumerate(dest_data["activities_list"]):
+                act_lat = lat_base + (offset_multiplier * idx) if lat_base else None
+                act_lon = lon_base + (offset_multiplier * (idx % 2)) if lon_base else None
+                
                 act = Activity(
                     destination_id=dest.id,
                     name=act_data["name"],
@@ -529,6 +560,8 @@ def seed_database():
                     estimated_cost=act_data["cost"],
                     duration=act_data["duration"],
                     rating=act_data["rating"],
+                    latitude=act_lat,
+                    longitude=act_lon,
                 )
                 db.add(act)
                 total_act_added += 1

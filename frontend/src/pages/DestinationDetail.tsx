@@ -1,21 +1,14 @@
 import { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
-import axios from "axios";
 import Navbar from "../components/Navbar";
+import {
+  destinationsApi,
+  tripsApi,
+  getErrorMessage,
+  type DestinationData,
+  type ScoreBreakdown,
+} from "../api";
 import "./DestinationDetail.css";
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────────────────────────────────────────
-
-type ScoreBreakdown = {
-  budget_match: number;
-  activity_match: number;
-  season_match: number;
-  travel_style_match: number;
-  rating_match?: number;
-  overall_score: number;
-};
 
 type LocationState = {
   recommendation?: {
@@ -39,26 +32,14 @@ type LocationState = {
   // Preferences carried from TripPreferences so "Plan My Trip" can generate itinerary
   preferences?: {
     budget: string;
+    budgetPerPerson?: string;
+    numTravelers?: number;
+    totalGroupBudget?: number;
     tripDuration: string;
     travelStyle: string;
     season: string;
     activities: string[];
   };
-};
-
-type DestinationData = {
-  id: number;
-  name: string;
-  country: string;
-  region: string;
-  category: string;
-  budget_level: string;
-  description: string;
-  average_daily_cost: number;
-  best_season: string;
-  activities: string;
-  rating: number;
-  recommended_duration: number;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -154,15 +135,14 @@ export default function DestinationDetail() {
       setIsLoading(true);
       setErrorMsg(null);
       try {
-        const response = await axios.get(
-          `http://127.0.0.1:8000/api/destinations/${id}`
-        );
+        if (!id) throw new Error("Missing destination ID");
+        const data = await destinationsApi.getDestination(id);
         if (isMounted) {
-          setFetchedDestination(response.data);
+          setFetchedDestination(data);
         }
-      } catch {
+      } catch (err) {
         if (isMounted) {
-          setErrorMsg("Could not load destination details. Please go back and try again.");
+          setErrorMsg(getErrorMessage(err, "Could not load destination details. Please go back and try again."));
         }
       } finally {
         if (isMounted) {
@@ -193,28 +173,37 @@ export default function DestinationDetail() {
                 .map((a) => a.trim().toLowerCase())
                 .filter(Boolean);
 
-        const response = await axios.post(
-          `http://127.0.0.1:8000/api/trips/activities/${destination.id}`,
+        const b = Number(prefs.budgetPerPerson || prefs.budget) || 50000;
+        const numTravelers = Number(prefs.numTravelers) || 1;
+
+        const planData = await tripsApi.generateTripItinerary(
+          destination.id,
           activitiesList,
           {
-            params: {
-              budget: Number(prefs.budget) || 50000,
-              travel_style: prefs.travelStyle || "adventure",
-              trip_duration: Number(prefs.tripDuration) || 3,
-            },
+            budget: b,
+            budget_per_person: b,
+            num_travelers: numTravelers,
+            travel_style: prefs.travelStyle || "adventure",
+            trip_duration: Number(prefs.tripDuration) || 3,
           }
         );
 
         navigate("/trip-plan", {
           state: {
             destination: destination.name,
-            tripDuration: Number(prefs.tripDuration) || 3,
-            itinerary: response.data.itinerary,
+            tripDuration: planData.actual_trip_duration || Number(prefs.tripDuration) || 3,
+            requestedTripDuration: planData.requested_trip_duration || Number(prefs.tripDuration) || 3,
+            insufficientActivities: planData.insufficient_activities,
+            itineraryNotice: planData.itinerary_notice,
+            itinerary: planData.itinerary,
+            destinationDetails: destination,
+            cost_breakdown: planData.cost_breakdown,
+            preferences: prefs,
           },
         });
       } catch (err) {
         console.error("Failed to generate itinerary:", err);
-        navigate("/trip-plan");
+        setErrorMsg(getErrorMessage(err, "Failed to generate your personalized itinerary. Please try again."));
       } finally {
         setIsGeneratingPlan(false);
       }

@@ -17,3 +17,5 @@ class Activity(Base):
     duration = Column(Float, default=1.5)
     rating = Column(Float, default=4.5)
     description = Column(String(300), nullable=True)
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)

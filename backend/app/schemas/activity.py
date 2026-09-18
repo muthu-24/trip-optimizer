@@ -9,6 +9,8 @@ class ActivityResponse(BaseModel):
     estimated_cost: float
     duration: float | None
     rating: float | None
+    latitude: float | None = None
+    longitude: float | None = None
 
     class Config:
         from_attributes = True

@@ -6,6 +6,8 @@ import Dashboard from "./pages/Dashboard";
 import TripPreferences from "./pages/TripPreferences";
 import TripPlan from "./pages/TripPlan";
 import DestinationDetail from "./pages/DestinationDetail";
+import SavedTrips from "./pages/SavedTrips";
+import SavedTripDetail from "./pages/SavedTripDetail";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -57,6 +59,24 @@ function App() {
           element={
             <ProtectedRoute>
               <DestinationDetail />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/my-trips"
+          element={
+            <ProtectedRoute>
+              <SavedTrips />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/my-trips/:id"
+          element={
+            <ProtectedRoute>
+              <SavedTripDetail />
             </ProtectedRoute>
           }
         />

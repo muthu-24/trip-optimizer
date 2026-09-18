@@ -1,4 +1,5 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { removeToken } from "../api";
 import "./Navbar.css";
 
 export default function Navbar() {
@@ -6,7 +7,7 @@ export default function Navbar() {
   const location = useLocation();
 
   const handleLogout = () => {
-    localStorage.removeItem("access_token");
+    removeToken();
     navigate("/login");
   };
 
@@ -17,6 +18,9 @@ export default function Navbar() {
     location.pathname === "/trip-preferences" ||
     location.pathname.startsWith("/destinations");
   const isItineraryActive = location.pathname === "/trip-plan";
+  const isSavedTripsActive =
+    location.pathname === "/my-trips" ||
+    location.pathname.startsWith("/my-trips/");
 
   return (
     <header className="navbar">
@@ -63,6 +67,13 @@ export default function Navbar() {
             className={`navbar-link ${isItineraryActive ? "active" : ""}`}
           >
             Itinerary
+          </Link>
+
+          <Link
+            to="/my-trips"
+            className={`navbar-link ${isSavedTripsActive ? "active" : ""}`}
+          >
+            My Trips
           </Link>
 
           <button

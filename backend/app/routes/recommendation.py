@@ -26,10 +26,12 @@ def get_recommendations(
 
     recommendations = []
 
+    budget_per_person = request.budget_per_person or request.budget
+
     for destination in destinations:
         breakdown = calculate_score_breakdown(
             destination=destination,
-            budget=request.budget,
+            budget=budget_per_person,
             trip_duration=request.trip_duration,
             travel_style=request.travel_style,
             preferred_activities=request.preferred_activities,
@@ -38,15 +40,20 @@ def get_recommendations(
 
         reasons = generate_recommendation_reasons(
             destination=destination,
-            budget=request.budget,
+            budget=budget_per_person,
             trip_duration=request.trip_duration,
             travel_style=request.travel_style,
             preferred_activities=request.preferred_activities,
-            season=request.season
+            season=request.season,
+            num_travelers=request.num_travelers
         )
 
         description = get_destination_description(destination)
-        cost_breakdown = calculate_trip_cost_breakdown(destination, request.trip_duration)
+        cost_breakdown = calculate_trip_cost_breakdown(
+            destination,
+            request.trip_duration,
+            num_travelers=request.num_travelers
+        )
 
         recommendations.append({
             "id": destination.id,
@@ -70,10 +77,16 @@ def get_recommendations(
                 "transportation": cost_breakdown["trip_transportation"],
                 "daily_average": cost_breakdown["daily_total"],
                 "estimated_trip_cost": cost_breakdown["estimated_trip_total"],
+                "num_travelers": request.num_travelers,
+                "cost_per_person": cost_breakdown["cost_per_person"],
             },
             "description": description,
             "average_daily_cost": destination.average_daily_cost,
             "estimated_trip_cost": round(
+                destination.average_daily_cost * request.trip_duration * request.num_travelers,
+                2
+            ),
+            "estimated_trip_cost_per_person": round(
                 destination.average_daily_cost * request.trip_duration,
                 2
             ),
@@ -91,6 +104,9 @@ def get_recommendations(
     )
 
     return {
+        "num_travelers": request.num_travelers,
+        "budget_per_person": budget_per_person,
+        "total_group_budget": request.total_group_budget,
         "recommendations": recommendations,
         "total_destinations": len(recommendations)
     }

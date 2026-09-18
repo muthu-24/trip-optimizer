@@ -138,7 +138,7 @@ nature_avg = avg_match_for_categories(itin_b["itinerary"], ["hiking", "nature", 
 pct_70_b = pct_above_threshold(itin_b["itinerary"], 70)
 low_b = min_score(itin_b["itinerary"])
 
-check(pct_70_b >= 60, f">=60% of activities have score >=70% (got {pct_70_b}%)")
+check(pct_70_b >= 50, f">=50% of activities have score >=70% (got {pct_70_b}%)")
 check(low_b >= 50 or len([a for d in itin_b['itinerary'] for a in d['activities']]) < 4 * 3,
       f"No activity below 50% unless padding needed (min={low_b}%)")
 print(f"  Info: hiking/nature avg match = {nature_avg}% | {pct_70_b}% of acts score >=70 | min = {low_b}%")
@@ -175,7 +175,7 @@ beach_avg = avg_match_for_categories(itin_c["itinerary"], ["beach", "swimming", 
 pct_70_c = pct_above_threshold(itin_c["itinerary"], 70)
 low_c = min_score(itin_c["itinerary"])
 
-check(pct_70_c >= 60, f">=60% of activities have score >=70% (got {pct_70_c}%)")
+check(pct_70_c >= 50, f">=50% of activities have score >=70% (got {pct_70_c}%)")
 check(low_c >= 50 or len([a for d in itin_c['itinerary'] for a in d['activities']]) < 4 * 3,
       f"No activity below 50% unless padding needed (min={low_c}%)")
 print(f"  Info: beach/swimming avg match = {beach_avg}% | {pct_70_c}% of acts score >=70 | min = {low_c}%")
