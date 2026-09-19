@@ -1,6 +1,9 @@
 from sqlalchemy import text
 
-from database import engine
+try:
+    from app.database import engine
+except ImportError:
+    from database import engine
 
 
 try:

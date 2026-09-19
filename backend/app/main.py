@@ -6,8 +6,11 @@ from app.routes.recommendation import router as recommendation_router
 from app.database import Base, engine
 from app.models import User, Destination
 from app.models.activity import Activity
+from app.models.saved_trip import SavedTrip
 from app.routes.activity import router as activity_router
 from app.routes.trip import router as trip_router
+from app.routes.destination import router as destination_router
+from app.routes.saved_trips import router as saved_trips_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -28,8 +31,10 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(recommendation_router)
+app.include_router(destination_router)
 app.include_router(activity_router)
 app.include_router(trip_router)
+app.include_router(saved_trips_router)
 
 
 @app.get("/")
