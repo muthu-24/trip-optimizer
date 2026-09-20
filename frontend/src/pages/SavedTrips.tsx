@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import {
   savedTripsApi,
@@ -30,6 +30,7 @@ function estimateTravelTime(distanceKm?: number | null): string {
 
 export default function SavedTrips() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [trips, setTrips] = useState<SavedTripSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +39,16 @@ export default function SavedTrips() {
   const [confirmId, setConfirmId] = useState<number | null>(null);
 
   const token = getToken();
+
+  // Handle incoming deletion or save notice from navigation state
+  useEffect(() => {
+    if (location.state?.notice) {
+      setSuccessNotice(location.state.notice as string);
+      navigate(location.pathname, { replace: true, state: {} });
+      const timer = setTimeout(() => setSuccessNotice(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [location, navigate]);
 
   async function fetchTrips() {
     setLoading(true);
@@ -57,10 +68,6 @@ export default function SavedTrips() {
       navigate("/login");
       return;
     }
-    /* eslint-disable react-hooks/set-state-in-effect */
-    setLoading(true);
-    setError(null);
-    /* eslint-enable react-hooks/set-state-in-effect */
     const controller = new AbortController();
     savedTripsApi
       .getSavedTrips(controller.signal)

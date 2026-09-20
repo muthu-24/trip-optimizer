@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from typing import Any
 
@@ -15,6 +15,8 @@ class SavedTripCreate(BaseModel):
 
 
 class SavedTripSummary(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     destination_name: str
     trip_duration: int
@@ -25,11 +27,10 @@ class SavedTripSummary(BaseModel):
     total_route_distance: float | None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
-
 
 class SavedTripDetail(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     destination_name: str
     trip_duration: int
@@ -40,6 +41,3 @@ class SavedTripDetail(BaseModel):
     total_route_distance: float | None
     itinerary_data: dict[str, Any]
     created_at: datetime
-
-    class Config:
-        from_attributes = True

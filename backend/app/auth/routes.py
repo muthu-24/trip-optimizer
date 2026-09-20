@@ -7,7 +7,7 @@ from fastapi import (
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
-from app.database import SessionLocal
+from app.database import get_db
 from app.models.user import User
 from app.schemas.user import (
     UserCreate,
@@ -29,15 +29,6 @@ router = APIRouter(
 )
 
 security = HTTPBearer()
-
-
-def get_db():
-    db = SessionLocal()
-
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @router.post(

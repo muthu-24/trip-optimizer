@@ -11,7 +11,9 @@ pwd_context = CryptContext(
 )
 
 
-SECRET_KEY = "trip-optimizer-secret-key"
+import os
+
+SECRET_KEY = os.getenv("SECRET_KEY", "trip-optimizer-secret-key")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 

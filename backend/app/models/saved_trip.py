@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, Float, DateTime
 from sqlalchemy.dialects.postgresql import JSONB
 from app.database import Base
@@ -17,4 +17,4 @@ class SavedTrip(Base):
     season = Column(String(100), nullable=True)
     total_route_distance = Column(Float, nullable=True)
     itinerary_data = Column(JSONB, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)

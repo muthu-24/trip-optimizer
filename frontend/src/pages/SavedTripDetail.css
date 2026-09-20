@@ -139,3 +139,70 @@
     padding: 1.25rem 1rem;
   }
 }
+
+/* Delete Action on Detail Page */
+.std-delete-trip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.625rem 1.125rem;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.std-delete-trip-btn:hover:not(:disabled) {
+  background: #dc2626;
+  color: #fff;
+  border-color: #dc2626;
+}
+
+.std-delete-confirm-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  padding: 0.375rem 0.625rem;
+  border-radius: var(--radius-sm);
+}
+
+.std-delete-confirm-text {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #991b1b;
+}
+
+.std-delete-btn-confirm {
+  padding: 0.25rem 0.625rem;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.std-delete-btn-confirm:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.std-delete-btn-cancel {
+  padding: 0.25rem 0.5rem;
+  background: transparent;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.std-delete-btn-cancel:hover:not(:disabled) {
+  background: #e2e8f0;
+}

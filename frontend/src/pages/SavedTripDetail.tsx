@@ -52,6 +52,23 @@ export default function SavedTripDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reloadTrigger, setReloadTrigger] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const handleDeleteTrip = async () => {
+    if (!id) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await savedTripsApi.deleteSavedTrip(Number(id));
+      navigate("/my-trips", { state: { notice: "Trip deleted successfully." } });
+    } catch (err: unknown) {
+      setDeleteError(getErrorMessage(err, "Unable to delete this trip. Please try again."));
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
 
   const token = getToken();
 
@@ -211,8 +228,46 @@ export default function SavedTripDetail() {
             <Link to="/plan-trip" className="primary-link-btn">
               <span>Plan Another Trip</span>
             </Link>
+            {showDeleteConfirm ? (
+              <div className="std-delete-confirm-group">
+                <span className="std-delete-confirm-text">Delete this trip?</span>
+                <button
+                  type="button"
+                  onClick={handleDeleteTrip}
+                  disabled={isDeleting}
+                  className="std-delete-btn-confirm"
+                >
+                  {isDeleting ? "Deleting…" : "Yes, Delete"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteConfirm(false)}
+                  disabled={isDeleting}
+                  className="std-delete-btn-cancel"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={isDeleting}
+                className="std-delete-trip-btn"
+                title="Delete this saved trip"
+              >
+                🗑️ Delete Trip
+              </button>
+            )}
           </div>
         </header>
+
+        {deleteError && (
+          <div className="itinerary-save-error-banner" role="alert" style={{ marginBottom: "1.5rem" }}>
+            <span className="banner-icon">⚠️</span>
+            <span className="banner-text">{deleteError}</span>
+          </div>
+        )}
 
         {/* Notice for Gracefully Adjusted Trips */}
         {itineraryNotice && (
