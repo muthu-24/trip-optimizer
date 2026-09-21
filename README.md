@@ -65,11 +65,12 @@ The frontend runs on `http://localhost:5173` and proxies API calls to `http://lo
 
 ### Environment Variables
 
-| Variable       | Location      | Description                                    |
-| -------------- | ------------- | ---------------------------------------------- |
-| `DATABASE_URL` | `backend/.env` | PostgreSQL connection string                  |
-| `SECRET_KEY`   | `backend/.env` | JWT signing key (defaults to dev key if unset)|
-| `VITE_API_URL` | `frontend/.env`| Backend API URL (defaults to localhost:8000)  |
+| Variable          | Location       | Description                                                                       |
+| ----------------- | -------------- | --------------------------------------------------------------------------------- |
+| `DATABASE_URL`    | `backend/.env`  | PostgreSQL connection string (required)                                           |
+| `SECRET_KEY`      | `backend/.env`  | JWT signing key (required in production; uses dev key if unset in local dev)       |
+| `ALLOWED_ORIGINS` | `backend/.env`  | Comma-separated list of CORS origins (defaults to `http://localhost:5173`)        |
+| `VITE_API_URL`    | `frontend/.env` | Backend API URL (defaults to `http://localhost:8000`)                             |
 
 ## Running Tests
 
@@ -96,6 +97,8 @@ cd backend
 cd frontend
 npm run build
 ```
+
+> **Important for Production Deployment:** `VITE_API_URL` must be supplied by the deployment platform (or defined in your build environment) **before** executing `npm run build`. Vite bakes `VITE_*` variables directly into the compiled JavaScript bundle at build time; runtime environment variables set on static hosting servers will not take effect without rebuilding.
 
 ## Project Structure
 

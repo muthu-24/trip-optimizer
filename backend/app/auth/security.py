@@ -1,19 +1,34 @@
+import os
 from datetime import datetime, timedelta, timezone
 
+from dotenv import load_dotenv
 from fastapi import HTTPException, status
 from jose import jwt
 from passlib.context import CryptContext
 
+load_dotenv()
 
 pwd_context = CryptContext(
     schemes=["bcrypt"],
     deprecated="auto"
 )
 
+_ENVIRONMENT = os.getenv("ENVIRONMENT", os.getenv("ENV", "development")).lower()
+SECRET_KEY = os.getenv("SECRET_KEY")
 
-import os
+if not SECRET_KEY:
+    if _ENVIRONMENT == "production":
+        raise RuntimeError(
+            "SECRET_KEY environment variable is missing in production. "
+            "Set a secure SECRET_KEY in your production environment variables."
+        )
+    SECRET_KEY = "dev-insecure-secret-key-change-in-production"
+elif _ENVIRONMENT == "production" and SECRET_KEY == "trip-optimizer-secret-key":
+    raise RuntimeError(
+        "The compromised default secret 'trip-optimizer-secret-key' cannot be used in production. "
+        "Please generate and set a secure random SECRET_KEY."
+    )
 
-SECRET_KEY = os.getenv("SECRET_KEY", "trip-optimizer-secret-key")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
